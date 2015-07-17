@@ -6,13 +6,21 @@ public class networkPlayer : Photon.MonoBehaviour {
 	Vector3 realPosition = Vector3.zero;
 	Quaternion realRotation = Quaternion.identity;
 	float lastUpdateTime;
+	[SerializeField] GameObject _camera;
 
 	void Start () 
 	{
 		if (photonView.isMine)
 		{
-			this.GetComponent<ThirdPersonCharacter>().enabled = true;
-			this.GetComponent<ThirdPersonUserControl>().enabled = true;
+			GetComponent<ThirdPersonCharacter>().enabled = true;
+			GetComponent<ThirdPersonUserControl>().enabled = true;
+			_camera.SetActive(true);
+		}
+		else
+		
+		{
+			GetComponent<Rigidbody>().isKinematic = true;
+			GetComponent<Rigidbody>().useGravity = false;
 		}
 	}
 	

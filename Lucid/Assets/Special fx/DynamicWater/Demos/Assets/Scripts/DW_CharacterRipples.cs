@@ -1,11 +1,11 @@
 using System.Collections;
 using LostPolygon.DynamicWaterSystem;
 using UnityEngine;
+using UnityStandardAssets.Characters.ThirdPerson;
 
 /// <summary>
 /// Creates ripples when Character walks in the water.
 /// </summary>
-[RequireComponent(typeof (CharacterController))]
 [RequireComponent(typeof (WaterDetector))]
 public class DW_CharacterRipples : MonoBehaviour {
     // Ripple parameters
@@ -30,7 +30,9 @@ public class DW_CharacterRipples : MonoBehaviour {
     public AudioClip[] SplashSounds;
 
     private WaterDetector _waterDetector;
-    private CharacterController _controller;
+    private CapsuleCollider _controller;
+	private Rigidbody _vController;
+	private ThirdPersonCharacter _tController;
 
     private bool _isSubmergedPrev = true;
     private bool _isSubmerged = true;
@@ -49,7 +51,9 @@ public class DW_CharacterRipples : MonoBehaviour {
                 return;
             }
 
-            _controller = GetComponent<CharacterController>();
+			_controller = GetComponent<CapsuleCollider>();
+			_vController = GetComponent<Rigidbody>();
+			bool isGrounded = GetComponent<ThirdPersonCharacter>().m_IsGrounded;
 
             // If we are actually submerged to a some extent
             float waterLevel = water.GetWaterLevel(transform.position);
@@ -59,12 +63,12 @@ public class DW_CharacterRipples : MonoBehaviour {
             _isSubmerged = min < waterLevel && max > waterLevel;
 
             // Do not make ripples while standing
-            if (_controller.velocity.sqrMagnitude > 0.5f && _isSubmerged) {
+			if (_vController.velocity.sqrMagnitude > 0.5f && _isSubmerged) {
                 water.CreateSplash(transform.position, SplashRadius, SplashForce * Time.deltaTime);
             }
 
             // Checking if we must make a splash 
-            if (_splashAllowed && _isSubmerged && _isSubmerged != _isSubmergedPrev && !_controller.isGrounded && _controller.velocity.y < -SplashThreshold) {
+			if (_splashAllowed && _isSubmerged && _isSubmerged != _isSubmergedPrev && !isGrounded && _vController.velocity.y < -SplashThreshold) {
                 SpawnSplash(JumpSplashPrefab, water.PlaneCollider.ClosestPointOnBounds(transform.position));
                 water.CreateSplash(transform.position, JumpSplashRadius, JumpSplashForce);
 

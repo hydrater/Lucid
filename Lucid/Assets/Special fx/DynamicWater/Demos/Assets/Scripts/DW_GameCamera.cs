@@ -78,16 +78,9 @@ public class DW_GameCamera : MonoBehaviour {
     private void UpdatePlayerFollow() {
         // If either mouse buttons are down, let the mouse govern camera position 
         if (GUIUtility.hotControl == 0) {
-            if (Application.platform != RuntimePlatform.Android && Input.GetMouseButton(1)) {
                 _xDeg += Input.GetAxis("Mouse X") * XSpeed * 0.02f;
                 _yDeg -= Input.GetAxis("Mouse Y") * YSpeed * 0.02f;
-            }
                 // otherwise, ease behind the target if any of the directional keys are pressed 
-            else if (RotateToTarget) {
-                float targetRotationAngle = Target.eulerAngles.y;
-                float currentRotationAngle = transform.eulerAngles.y;
-                _xDeg = Mathf.LerpAngle(currentRotationAngle, targetRotationAngle, RotationDampening * Time.deltaTime);
-            }
         }
 
         //_targetPos = Vector3.Lerp(_targetPos, Target.position, Time.deltaTime * PositionDampening);

@@ -88,6 +88,7 @@ public class DW_ThirdPersonController : MonoBehaviour {
     private bool _isControllable = true;
 
     private void Awake() {
+		Camera = Camera.main ?? Camera.allCameras[0];
         _moveDirection = transform.TransformDirection(Vector3.forward);
 
         _animation = GetComponent<Animation>();
@@ -261,10 +262,6 @@ public class DW_ThirdPersonController : MonoBehaviour {
         if (!_isControllable) {
             // kill all inputs if not controllable.
             Input.ResetInputAxes();
-        }
-
-        if (Camera == null) {
-            Camera = Camera.main ?? Camera.allCameras[0];
         }
 
         if (Input.GetButtonDown("Jump")) {

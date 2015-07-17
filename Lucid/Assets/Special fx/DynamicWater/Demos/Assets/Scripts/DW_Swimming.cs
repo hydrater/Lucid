@@ -1,24 +1,24 @@
 using UnityEngine;
 using LostPolygon.DynamicWaterSystem;
-using UnityStandardAssets.Characters.FirstPerson;
 
 /// <summary>
 /// An example of the swimming script.
 /// </summary>
 [RequireComponent(typeof (CharacterController))]
+[RequireComponent(typeof (DW_ThirdPersonController))]
 [RequireComponent(typeof (WaterDetector))]
 public class DW_Swimming : MonoBehaviour {
     public float SwimSpeed = 1f;
-    public KeyCode SwimUpKey = KeyCode.X;
+    public KeyCode SwimUpKey = KeyCode.Space;
 
     private CharacterController _controller;
-	private FirstPersonController _firstPersonController;
+    private DW_ThirdPersonController _thirdPersonController;
     private WaterDetector _waterDetector;
 
     private bool _isSubmerged = true;
 
     private void Start() {
-		_firstPersonController = GetComponent<FirstPersonController>();
+        _thirdPersonController = GetComponent<DW_ThirdPersonController>();
         Camera.allCameras[0].depthTextureMode = DepthTextureMode.Depth;
     }
 
@@ -31,7 +31,7 @@ public class DW_Swimming : MonoBehaviour {
         // If we are in the water
         if (_waterDetector != null) {
             _controller = GetComponent<CharacterController>();
-			_firstPersonController = GetComponent<FirstPersonController>();
+            _thirdPersonController = GetComponent<DW_ThirdPersonController>();
 
             // If we are actually submerged to a some extent
             float waterLevel = _waterDetector.GetWaterLevel(transform.position);
@@ -47,13 +47,8 @@ public class DW_Swimming : MonoBehaviour {
 
             if (_isSubmerged) {
                 bool flag = Input.GetKey(SwimUpKey);
-				_firstPersonController.canJump = false;
-				_firstPersonController.m_WalkSpeed = 2.5f;
-				_firstPersonController.m_RunSpeed = 5;
-				_firstPersonController.canPlaySound = false;
-				_firstPersonController.m_GravityMultiplier = .5f;
                 if (flag) {
-					_firstPersonController.m_MoveDir.y = .5f;
+                    _thirdPersonController.VerticalSpeed = 0f;
                 }
 
                 // Swimming u
@@ -61,14 +56,6 @@ public class DW_Swimming : MonoBehaviour {
                     _controller.Move(Vector3.up * SwimSpeed * submergedCoeff * Time.deltaTime);
                 }
             }
-			else
-			{
-				_firstPersonController.m_WalkSpeed = 5;
-				_firstPersonController.m_RunSpeed = 10;
-				_firstPersonController.canJump = true;
-				_firstPersonController.canPlaySound = true;
-				_firstPersonController.m_GravityMultiplier = 2;
-			}
         }
     }
 }

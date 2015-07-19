@@ -27,11 +27,7 @@ public class networkPlayer : Photon.MonoBehaviour {
 	void Update()
 	{
 		//Debug.Log(test.GetComponent<AudioSource>().timeSamples);
-		if (photonView.isMine)
-		{
-			
-		}
-		else
+		if (!photonView.isMine)
 		{
 			transform.position = Vector3.Lerp(transform.position, realPosition, 0.1f);
 			transform.rotation = Quaternion.Lerp(transform.rotation, realRotation, 0.1f);
@@ -44,13 +40,11 @@ public class networkPlayer : Photon.MonoBehaviour {
 		{
 			stream.SendNext(transform.position);
 			stream.SendNext(transform.rotation);
-			//stream.SendNext(daldal);
 		}
 		else
 		{
 			realPosition = (Vector3)stream.ReceiveNext();
 			realRotation = (Quaternion)stream.ReceiveNext();
-			//daldal = (bool)stream.ReceiveNext();
 		}
 	}
 }

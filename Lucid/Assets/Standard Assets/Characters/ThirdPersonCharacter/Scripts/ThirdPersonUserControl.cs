@@ -9,13 +9,18 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         private ThirdPersonCharacter m_Character; // A reference to the ThirdPersonCharacter on the object
         private Transform m_Cam;                  // A reference to the main camera in the scenes transform
         private Vector3 m_CamForward;             // The current forward direction of the camera
-        private Vector3 m_Move;
-        private bool m_Jump;                      // the world-relative desired move direction, calculated from the camForward and user input.
-        
+		private Vector3 m_Move;					 // the world-relative desired move direction, calculated from the camForward and user input.
+		private bool m_Jump, canSprint = false, canDash = false, isMoving = false; 
+        private Animator anim;
+        private float sprintTimer, dashTimer;
+        private static Vector3 playerPos;
+                            
         private void Start()
         {
 			m_Cam = Camera.allCameras[0].transform;
             m_Character = GetComponent<ThirdPersonCharacter>();
+			anim = GetComponent<Animator>();
+			playerPos = transform.position;
         }
 
         private void Update()
@@ -24,6 +29,41 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             {
 				m_Jump = Input.GetButtonDown("Jump");
             }
+			if (Input.GetKeyDown(KeyCode.LeftShift) && m_Character.m_IsGrounded)
+			{
+				sprintTimer = 0;
+				canSprint = true;
+			}
+			if (Input.GetKeyUp(KeyCode.LeftShift))
+			{
+				if (canSprint)
+				{
+					anim.speed = 1;
+					if (sprintTimer < 0.2f)
+					{
+						canDash = true;
+						dashTimer = 0.5f;
+					}
+					canSprint = false;
+				}
+			}
+			if (canSprint)
+			{
+				sprintTimer += Time.deltaTime;
+				if (sprintTimer > 0.8f)
+				{
+					anim.speed = 1.5f;
+				}
+			}
+			if (canDash)
+			{
+				transform.Translate(Vector3.forward * Time.deltaTime * 20);
+				dashTimer += Time.deltaTime;
+				if (dashTimer > 0.7)
+				{
+					canDash = false;
+				}
+			}
         }
 
         // Fixed update is called in sync with physics
@@ -32,6 +72,18 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             // read inputs
             float h = Input.GetAxis("Horizontal");
             float v = Input.GetAxis("Vertical");
+            
+			//Check if playing is moving and disable sprinting if not moving
+			if (transform.position.z != playerPos.z)
+				isMoving = true;
+			else
+				isMoving = false;
+			playerPos = transform.position;
+			if (canSprint && !isMoving)
+			{
+				anim.speed = 1;
+				canSprint = false;
+			}
 
             // calculate move direction to pass to character
             if (m_Cam != null)

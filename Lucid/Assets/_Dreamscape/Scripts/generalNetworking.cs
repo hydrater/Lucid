@@ -41,7 +41,6 @@ public class generalNetworking : Photon.MonoBehaviour
 			PhotonNetwork.JoinOrCreateRoom(PlayerPrefs.GetString("roomName"), roomOptions, TypedLobby.Default);
 			PlayerPrefs.SetString("roomName", "Dreamscape");
 		}
-		
 	}
 	
 	void OnJoinedRoom()

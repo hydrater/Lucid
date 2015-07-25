@@ -3,6 +3,8 @@ using System.Collections;
 
 public class maptileGeneration : Photon.MonoBehaviour {
 	const string VERSION = "Prototype";
+	
+	//FOR FOLIAGE SYSTEM, MAKE SURE TO DESTROY SCRIPT AFTER CHECKING
 
 	void Awake () 
 	{

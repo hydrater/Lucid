@@ -27,12 +27,9 @@ public class AdvancedSaveSystem : MonoBehaviour {
                 string unE = variablesValue[i];
 
                 File.WriteAllText(path + "\\" + variablesName[i], Encrypt(unE));
-                AdvancedSaveSystem_FileEncryptor.EncryptFile(path + "\\" + variablesName[i], path + "\\" + variablesName[i] + ".nc");
+                AdvancedSaveSystem_FileEncryptor.EncryptFile(path + "\\" + variablesName[i], path + "\\" + variablesName[i] + ".soul");
                 i++;
             }
-           
-            AdvancedSaveSystem_MessageSystem.msg = "Game Saved!";
-
         }
         catch 
         { 
@@ -44,13 +41,12 @@ public class AdvancedSaveSystem : MonoBehaviour {
         string path = Environment.ExpandEnvironmentVariables(specialPath) + "\\" + folderName + "\\Slot" + slot.ToString();
           for (int i = 0; i < variablesName.Length; )
           {
-              AdvancedSaveSystem_FileEncryptor.DecryptFile(path + "\\" + variablesName[i] + ".nc", (path + "\\" + variablesName[i]));
+              AdvancedSaveSystem_FileEncryptor.DecryptFile(path + "\\" + variablesName[i] + ".soul", (path + "\\" + variablesName[i]));
               string toD = File.ReadAllText(path + "\\" + variablesName[i]);
               variablesValue[i] = Decrypt(toD);
               File.Delete(path + "\\" + variablesName[i]);
               i++;
           }
-          AdvancedSaveSystem_MessageSystem.msg = "Game Loaded!";
     }
     void Start()
     {

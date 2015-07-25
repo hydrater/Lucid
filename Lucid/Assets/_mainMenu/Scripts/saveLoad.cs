@@ -5,22 +5,45 @@ using UnityStandardAssets.Characters.FirstPerson;
 using UnityEngine.UI;
 
 public class saveLoad : MonoBehaviour {
-	[SerializeField] private GameObject saveLoadUI, editSaveUI, loadSaveUI, player, saveLoadPrefab, totalPoints, name, saveInfo;
-	[SerializeField] private GameObject vitalityBar, durabilityBar, intelligenceBar, focusBar, reflexesBar;
-	[SerializeField] private GameObject vitalitySum, durabilitySum, intelligenceSum, focusSum, reflexesSum;
-	private float total, vit ,dur, intel, foc, rf;
+	[SerializeField] private GameObject saveLoadUI, editSaveUI, loadSaveUI, player, saveLoadPrefab, totalPoints;
+	[SerializeField] private GameObject levelAmount, name, saveInfo, statInfo;
+	[SerializeField] private GameObject vitalityBar, durabilityBar, intelligenceBar, focusBar, flexibilityBar;
+	[SerializeField] private GameObject vitalitySum, durabilitySum, intelligenceSum, focusSum, flexibilitySum;
+	private float total, vit ,dur, intel, foc, fx;
 	private sbyte mouseOn = 0;
+	private string[] temp;
 	
 	void Start() 
 	{
-		//total = (level * 2) - used variables;
-		total = 0;
-		//load all current stat attributes and assign to int variables
-		vit = 0;
-		dur = 0;
-		intel = 0;
-		foc = 0; 
-		rf = 0;
+		if (PlayerPrefs.GetInt("fileLoad") != null)
+		{
+			try
+			{
+				saveLoadPrefab.GetComponent<AdvancedSaveSystem>().LoadData(PlayerPrefs.GetInt("fileLoad"));
+				temp = saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[0].Split(',');
+				//0 name 1 level 2 money 3 vit 4 dur 5 intel 6 foc 7 fx
+				name.GetComponent<InputField>().text = temp[0];
+				vit = float.Parse(temp[3]);
+				dur = float.Parse(temp[4]);
+				intel = float.Parse(temp[5]);
+				foc = float.Parse(temp[6]); 
+				fx = float.Parse(temp[7]);
+				total = int.Parse(temp[1]) * 2 - vit - dur - intel - foc - fx;
+				//Set save info to UI
+				levelAmount.GetComponent<Text>().text = temp[1];
+				vitalityBar.GetComponent<Slider>().value = vit;
+				durabilityBar.GetComponent<Slider>().value = dur;
+				intelligenceBar.GetComponent<Slider>().value = intel;
+				focusBar.GetComponent<Slider>().value = foc;
+				flexibilityBar.GetComponent<Slider>().value = fx;
+				totalPoints.GetComponent<Text>().text = total.ToString();
+			}
+			catch(System.IO.FileNotFoundException)
+			{
+				regiClean();
+				saveInfo.GetComponent<Text>().text = "";
+			}
+		}
 	}
 	
 	void Update()
@@ -37,6 +60,7 @@ public class saveLoad : MonoBehaviour {
 		player.GetComponent<FirstPersonController>().enabled = true;
 		Cursor.visible = false;
 		saveLoadUI.SetActive(false);
+		saveInfo.GetComponent<Text>().text = "";
 	}
 	
 	public void btnEdit ()
@@ -75,9 +99,9 @@ public class saveLoad : MonoBehaviour {
 		mouseOn = 4;
 	}
 	
-	public void reflexesBarChange ()
+	public void flexibilityBarChange ()
 	{
-		reflexesSum.GetComponent<Text>().text = reflexesBar.GetComponent<Slider>().value.ToString();
+		flexibilitySum.GetComponent<Text>().text = flexibilityBar.GetComponent<Slider>().value.ToString();
 		mouseOn = 5;
 	}
 	
@@ -155,20 +179,20 @@ public class saveLoad : MonoBehaviour {
 			totalPoints.GetComponent<Text>().text = total.ToString();
 			break;
 		case 5:
-			temp = reflexesBar.GetComponent<Slider>().value -= rf;
+			temp = flexibilityBar.GetComponent<Slider>().value -= fx;
 			Debug.Log(temp);
 			total -= temp;
-			rf += temp;
+			fx += temp;
 			if (total < 0)
 			{
 				total += temp;
-				rf -= temp;
-				rf += total;
+				fx -= temp;
+				fx += total;
 				total = 0;
-				reflexesBar.GetComponent<Slider>().value = rf;
-				reflexesSum.GetComponent<Text>().text = rf.ToString();
+				flexibilityBar.GetComponent<Slider>().value = fx;
+				flexibilitySum.GetComponent<Text>().text = fx.ToString();
 			}
-			reflexesBar.GetComponent<Slider>().value = rf;
+			flexibilityBar.GetComponent<Slider>().value = fx;
 			totalPoints.GetComponent<Text>().text = total.ToString();
 			break; 
 		default:
@@ -176,48 +200,48 @@ public class saveLoad : MonoBehaviour {
 		}
 	}
 	
+	public void regiClean ()
+	{
+		PlayerPrefs.DeleteAll();
+		saveInfo.GetComponent<Text>().text = "Registry deleted";
+	}
+	
 	public void saveSlot1 ()
 	{
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[0] = name.GetComponent<InputField>().text;
-		PlayerPrefs.SetString("Name", name.GetComponent<InputField>().text);
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[1] = "1";
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[2] = "0";
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[3] = vit.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[4] = dur.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[5] = intel.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[6] = foc.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[7] = rf.ToString();
+		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[0] =
+		name.GetComponent<InputField>().text + "," + "1" + "," + "0" + "," +
+		vit.ToString() + "," + dur.ToString() + "," + intel.ToString()+ "," + foc.ToString() + "," 
+		+ fx.ToString();
 		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().SaveData(1);
+		PlayerPrefs.SetInt("fileLoad", 1);
+		//load to player, recommend function so I can use at start
+		string[] statInfo = saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[0].Split(',');
+		for(int i = 0; i < statInfo.Length-1; i++)
+		{
+			Debug.Log(statInfo[i]);
+		}
 		saveInfo.GetComponent<Text>().text = "Character saved at slot 1...";
 	}
 	
 	public void saveSlot2 ()
 	{
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[0] = name.GetComponent<InputField>().text;
-		PlayerPrefs.SetString("Name", name.GetComponent<InputField>().text);
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[1] = "1";
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[2] = "0";
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[3] = vit.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[4] = dur.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[5] = intel.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[6] = foc.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[7] = rf.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().SaveData(2);
+		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[0] =
+			name.GetComponent<InputField>().text + "," + "1" + "," + "0" + "," +
+				vit.ToString() + "," + dur.ToString() + "," + intel.ToString()+ "," + foc.ToString() + "," 
+				+ fx.ToString();
+		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().SaveData(1);
+		PlayerPrefs.SetInt("fileLoad", 2);
 		saveInfo.GetComponent<Text>().text = "Character saved at slot 2...";
 	}
 	
 	public void saveSlot3 ()
 	{
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[0] = name.GetComponent<InputField>().text;
-		PlayerPrefs.SetString("Name", name.GetComponent<InputField>().text);
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[1] = "1";
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[2] = "0";
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[3] = vit.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[4] = dur.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[5] = intel.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[6] = foc.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[7] = rf.ToString();
-		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().SaveData(3);
+		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().variablesValue[0] =
+			name.GetComponent<InputField>().text + "," + "1" + "," + "0" + "," +
+				vit.ToString() + "," + dur.ToString() + "," + intel.ToString()+ "," + foc.ToString() + "," 
+				+ fx.ToString();
+		saveLoadPrefab.GetComponent<AdvancedSaveSystem>().SaveData(1);
+		PlayerPrefs.SetInt("fileLoad", 3);
 		saveInfo.GetComponent<Text>().text = "Character saved at slot 3...";
 	}
 }

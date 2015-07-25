@@ -43,7 +43,7 @@ public class Bed : MonoBehaviour {
 	{
 		if (other.tag == "Player")
 		{	
-			if (!PlayerPrefs.HasKey("Name"))
+			if (!PlayerPrefs.HasKey("fileLoad"))
 				bedText.GetComponent<Text>().text = "  Go to the closest\nand get a save first";
 			else
 			{
